@@ -1,0 +1,46 @@
+name: Frontend CI
+
+on:
+  #workflow_dispatch:
+  push:
+    branches: [ "master" ]
+    paths: [ "miaosha-h5/**" ]
+  pull_request:
+    branches: [ "master" ]
+    paths: [ "miaosha-h5/**" ]
+
+defaults:
+   run:
+     working-directory: ./miaosha-h5
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Setup node.js environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: 10.X
+        cache: 'npm'
+        cache-dependency-path: './miaosha-h5/package-lock.json'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build with npm
+      run: npm run build
+      
+    - name: Copy file via ssh password
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        source: "./miaosha-h5/dist/**"
+        target: ${{ secrets.TARGET_H5 }}
+        rm: true
+        strip_components: 1
+        

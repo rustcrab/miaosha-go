@@ -1,0 +1,6 @@
+*.exe
+conf.ini
+bin/
+
+node_modules/
+dist/
